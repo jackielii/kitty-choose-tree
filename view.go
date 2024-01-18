@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/jackielii/kitty-choose-tree/kitty"
 )
 
 var (
@@ -20,13 +21,6 @@ var (
 	quitTextStyle     = lipgloss.NewStyle().Margin(1, 0, 2, 4)
 )
 
-type Item interface {
-	Value() string
-	FilterValue() string
-}
-
-var _ list.Item = Item(nil)
-
 type itemDelegate struct{}
 
 func (d itemDelegate) Height() int                               { return 1 }
@@ -34,7 +28,7 @@ func (d itemDelegate) Spacing() int                              { return 0 }
 func (d itemDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd { return nil }
 
 func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
-	i, ok := listItem.(Item)
+	i, ok := listItem.(kitty.Item)
 	if !ok {
 		return
 	}
@@ -52,10 +46,23 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 type model struct {
 	list list.Model
 	keys keymaps
-	// selected Item
+
+	typing bool
 }
 
-func newModel(l list.Model) model {
+func newModel(items []list.Item) model {
+	l := list.New(items, itemDelegate{}, 0, 0)
+	// l.Title = ""
+	l.SetShowTitle(false)
+	l.SetHeight(-1)
+	l.SetShowStatusBar(false)
+	// l.SetShowPagination(false)
+	l.InfiniteScrolling = true
+	// l.SetFilteringEnabled(true)
+	l.Styles.Title = titleStyle
+	l.Styles.PaginationStyle = paginationStyle
+	l.Styles.HelpStyle = helpStyle
+
 	keys := newKeymaps()
 	l.AdditionalFullHelpKeys = func() []key.Binding {
 		return []key.Binding{
@@ -83,26 +90,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.keys.quit):
-			return m, tea.Quit
+		// case key.Matches(msg, m.keys.quit):
+		// 	return m, tea.Quit
 		case key.Matches(msg, m.keys.rename):
 			// return m, tea.
 
 		case key.Matches(msg, m.keys.sel):
-			switch i := m.list.SelectedItem().(type) {
-			case KittyWindow:
-				focusWindow(i)
-			case KittyTab:
-				focusTab(i)
-			case KittyOSWindow:
-				focusOSWindow(i)
-			}
-
+			kitty.Focus(m.list.SelectedItem().(kitty.Item))
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.nextTab):
 			items := m.list.VisibleItems()
 			for i := m.list.Cursor() + 1; i < len(items); i++ {
-				if _, ok := items[i].(KittyTab); ok {
+				if _, ok := items[i].(kitty.KittyTab); ok {
 					m.list.Select(i)
 					break
 				}
@@ -110,7 +109,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.prevTab):
 			items := m.list.VisibleItems()
 			for i := m.list.Cursor() - 1; i >= 0; i-- {
-				if _, ok := items[i].(KittyTab); ok {
+				if _, ok := items[i].(kitty.KittyTab); ok {
 					m.list.Select(i)
 					break
 				}
@@ -118,7 +117,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.nextOSWindow):
 			items := m.list.VisibleItems()
 			for i := m.list.Cursor() + 1; i < len(items); i++ {
-				if _, ok := items[i].(KittyOSWindow); ok {
+				if _, ok := items[i].(kitty.KittyOSWindow); ok {
 					m.list.Select(i)
 					break
 				}
@@ -126,7 +125,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.prevOSWindow):
 			items := m.list.VisibleItems()
 			for i := m.list.Cursor() - 1; i >= 0; i-- {
-				if _, ok := items[i].(KittyOSWindow); ok {
+				if _, ok := items[i].(kitty.KittyOSWindow); ok {
 					m.list.Select(i)
 					break
 				}
