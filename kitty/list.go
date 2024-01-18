@@ -19,6 +19,7 @@ type KittyWindow struct {
 	ID      int      `json:"id,omitempty"`
 	Cmdline []string `json:"cmdline,omitempty"`
 	Cwd     string   `json:"cwd,omitempty"`
+
 	// ForegroundProcess
 	IsActive  bool   `json:"is_active,omitempty"`
 	IsFocused bool   `json:"is_focused,omitempty"`
@@ -51,6 +52,7 @@ func (k KittyTab) FilterValue() string {
 
 type KittyOSWindow struct {
 	ID               int        `json:"id,omitempty"`
+	Title            string     `json:"title,omitempty"`
 	IsFocused        bool       `json:"is_focused,omitempty"`
 	IsActive         bool       `json:"is_active,omitempty"`
 	PlatformWindowID int        `json:"platform_window_id,omitempty"`
@@ -59,14 +61,14 @@ type KittyOSWindow struct {
 
 func (k KittyOSWindow) Value() string {
 	// TODO: assign a name to the OS window similar to Tmux Session name
-	return fmt.Sprintf("%v", k.ID)
+	return fmt.Sprintf("%v", k.Title)
 }
 
 func (k KittyOSWindow) FilterValue() string {
 	return ""
 }
 
-func CreateItems() []list.Item {
+func CreateItems() ([]list.Item, error) {
 	out, err := exec.Command("kitty", "@", "ls").CombinedOutput()
 	if err != nil {
 		panic(err)
@@ -77,7 +79,12 @@ func CreateItems() []list.Item {
 		panic(err)
 	}
 	res := make([]list.Item, 0)
+	titles, err := osWindowTitles()
+	if err != nil {
+		return nil, err
+	}
 	for _, w := range v {
+		w.Title = titles[w.ID]
 		res = append(res, w)
 		for _, t := range w.Tabs {
 			if len(t.Windows) == 1 && t.Windows[0].Title == "kitty-choose-tree" {
@@ -89,5 +96,26 @@ func CreateItems() []list.Item {
 			}
 		}
 	}
-	return res
+	return res, nil
+}
+
+func osWindowTitles() (map[int]string, error) {
+	script := `
+import json
+windows = boss.list_os_windows()
+res = dict([(w['id'], get_os_window_title(w['id'])) for w in windows])
+answer = json.dumps(res)
+`
+	res, err := RunKitten(script)
+	if err != nil {
+		return nil, err
+	}
+	var v map[int]string
+	err = json.Unmarshal([]byte(res), &v)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return v, nil
 }

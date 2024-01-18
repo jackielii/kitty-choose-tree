@@ -1,10 +1,7 @@
 from kittens.tui.handler import result_handler
 from kitty.fast_data_types import *
 
-
-def main(args):
-    pass
-
+def main(args): pass
 
 @result_handler(no_ui=True)
 def handle_result(args, answer, target_window_id, boss):
@@ -12,9 +9,7 @@ def handle_result(args, answer, target_window_id, boss):
     # {{- if .SendResult }}
     import socket
     import sys
-
     sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-
     server_address = "{{ .Socket }}"
     try:
         sock.connect(server_address)

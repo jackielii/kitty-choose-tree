@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -9,7 +10,11 @@ import (
 )
 
 func main() {
-	m := newModel(kitty.CreateItems())
+	items, err := kitty.CreateItems()
+	if err != nil {
+		log.Fatal(err)
+	}
+	m := newModel(items)
 
 	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
 		fmt.Println("Error running program:", err)

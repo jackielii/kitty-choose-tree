@@ -42,3 +42,9 @@ func TestRunKittenFail(t *testing.T) {
 	assert.Empty(t, result)
 	assert.Contains(t, err.Error(), "NameError")
 }
+
+func TestOSWindowTitles(t *testing.T) {
+	s, err := osWindowTitles()
+	require.NoError(t, err)
+	_ = s
+}

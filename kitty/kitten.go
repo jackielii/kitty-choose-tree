@@ -17,7 +17,7 @@ import (
 )
 
 func RunKitten(body string) (string, error) {
-	f, err := os.CreateTemp("", "kitty-choose-tree")
+	f, err := os.CreateTemp("", "kitten_*.sock")
 	if err != nil {
 		return "", err
 	}
