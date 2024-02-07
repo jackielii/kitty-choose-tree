@@ -11,4 +11,4 @@ TODO:
 - [ ] delete
 - [ ] config
 - [ ] preview
-- [ ] OS window title
+- [x] OS window title

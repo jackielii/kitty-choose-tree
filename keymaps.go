@@ -16,12 +16,12 @@ type keymaps struct {
 func newKeymaps() keymaps {
 	return keymaps{
 		nextTab: key.NewBinding(
-			key.WithKeys("tab"),
-			key.WithHelp("tab", "next tab"),
+			key.WithKeys("ctrl+j"),
+			key.WithHelp("ctrl+j", "next tab"),
 		),
 		prevTab: key.NewBinding(
-			key.WithKeys("shift+tab"),
-			key.WithHelp("shift+tab", "previous tab"),
+			key.WithKeys("ctrl+k"),
+			key.WithHelp("ctrl+k", "previous tab"),
 		),
 		nextOSWindow: key.NewBinding(
 			key.WithKeys("J"),
