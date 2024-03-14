@@ -91,9 +91,9 @@ func CreateItems() ([]list.Item, error) {
 				continue
 			}
 			res = append(res, t)
-			for _, wi := range t.Windows {
-				res = append(res, wi)
-			}
+			// for _, wi := range t.Windows {
+			// 	res = append(res, wi)
+			// }
 		}
 	}
 	return res, nil

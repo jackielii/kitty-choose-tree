@@ -45,3 +45,23 @@ func newKeymaps() keymaps {
 		),
 	}
 }
+
+func (k keymaps) disable() {
+	k.nextTab.SetEnabled(false)
+	k.prevTab.SetEnabled(false)
+	k.nextOSWindow.SetEnabled(false)
+	k.prevOSWindow.SetEnabled(false)
+	k.rename.SetEnabled(false)
+	k.sel.SetEnabled(false)
+	k.quit.SetEnabled(false)
+}
+
+func (k keymaps) enable() {
+	k.nextTab.SetEnabled(true)
+	k.prevTab.SetEnabled(true)
+	k.nextOSWindow.SetEnabled(true)
+	k.prevOSWindow.SetEnabled(true)
+	k.rename.SetEnabled(true)
+	k.sel.SetEnabled(true)
+	k.quit.SetEnabled(true)
+}
